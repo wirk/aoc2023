@@ -20,7 +20,7 @@ const getMap = (input: string, name: string) => {
 }
 function getMappedVal(val: any, mapConfigs: MapConfig[]) {
   const conf = mapConfigs.find(
-    (c) => val >= c.sourceStart && val <= c.sourceStart + c.len,
+    (c) => val >= c.sourceStart && val < c.sourceStart + c.len,
   )
   if (conf) {
     return conf.destStart + (val - conf.sourceStart)
