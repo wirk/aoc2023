@@ -1,6 +1,14 @@
+import { curry } from "ramda"
+
 export const match = {
   nums: /(\d+)/g,
 }
+
+export const lines = (rawInput: string) => rawInput.split("\n")
+
+export const split: (sep: string) => (s: string) => string[] = curry(
+  (sep: string, s: string) => s.split(sep),
+)
 
 export function numeralToDigit(v: string) {
   return +(

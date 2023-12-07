@@ -1,7 +1,8 @@
 import run from "aocrunner"
+import { lines } from "../utils/index.js"
 
 const parseInput = (rawInput: string) => {
-  return rawInput
+  return lines(rawInput)
 }
 
 const part1 = (rawInput: string) => {
