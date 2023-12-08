@@ -44,3 +44,15 @@ export const joinNumbers = (
   numbers: string | number | Array<string | number> | undefined,
   ...rest: Array<string | number | undefined>
 ) => +[numbers, rest].flat().join("")
+
+function gcd(a: number, b: number): number {
+  return !b ? a : gcd(b, a % b)
+}
+
+function lcm(a: number, b: number) {
+  return (a * b) / gcd(a, b)
+}
+
+export function leastCommonMultiple(arr: number[]) {
+  return arr.reduce(lcm)
+}
