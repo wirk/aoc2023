@@ -38,7 +38,7 @@ export const between = (x: number, min: number, max: number) =>
 
 export const multiply = (prev: number, val: string | number) => +val * prev
 
-export const add = (prev: number, val: string | number) => +val + prev
+export const add = (prev: number, val: string | number) => +val + +prev
 
 export const joinNumbers = (
   numbers: string | number | Array<string | number> | undefined,
