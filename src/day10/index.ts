@@ -1,8 +1,9 @@
 import run from "aocrunner"
 import { lines } from "../utils/index.js"
+import { booleanPointInPolygon, point, polygon } from "@turf/turf"
 
 const parseInput = (rawInput: string) => {
-  return lines(rawInput)
+  return lines(rawInput).map((row) => [...row])
 }
 
 enum Pipe {
@@ -13,6 +14,8 @@ enum Pipe {
   NW = "J",
   NE = "L",
 }
+
+type Tile = Pipe | "." | "S"
 
 enum Direction {
   N = "N",
@@ -44,9 +47,7 @@ const matrices = {
   W: [0, -1],
 }
 
-const part1 = (rawInput: string) => {
-  const input = parseInput(rawInput).map((row) => [...row])
-
+const findStart = (input: string[][]) => {
   const startPos: number[] = []
 
   input.forEach((r, ri) => {
@@ -79,62 +80,85 @@ const part1 = (rawInput: string) => {
     ),
   ) as Pipe
 
-  const countSteps = (tile: string, rowIndex: number, cellIndex: number) => {
-    let currentTile = tile
-    let directionsFromTile: Direction[]
-    let steps = 0
-    let position = [rowIndex, cellIndex]
-    let lastDirection: Direction | undefined = undefined
+  return {
+    startPipe,
+    startPos,
+  }
+}
 
-    while (
-      (directionsFromTile = directions[currentTile as Pipe]) &&
-      position.every((coordinate) => coordinate >= 0)
-    ) {
-      steps++
+const getLoop = (input: string[][]) => {
+  const { startPipe, startPos } = findStart(input)
 
-      const directionIndex: number = lastDirection
-        ? directionsFromTile.findIndex(
-            (direction) =>
-              !!lastDirection && direction !== opposites[lastDirection],
-          )
-        : 0
+  let currentTile: Tile = startPipe
+  let directionsFromTile: Direction[]
+  // let steps = 0
+  let position = startPos
+  let lastDirection: Direction | undefined = undefined
 
-      lastDirection = directionsFromTile[directionIndex]
-      const directions = matrices[lastDirection]
-      position = position.map(
-        (coordinate, index) => coordinate + directions[index],
-      )
+  const positions = [position]
 
-      currentTile = input[position[0]][position[1]]
+  while (
+    (directionsFromTile = directions[currentTile as Pipe]) &&
+    position.every((coordinate) => coordinate >= 0)
+  ) {
+    // steps++
 
-      if (currentTile === "S") break
-    }
+    const directionIndex: number = lastDirection
+      ? directionsFromTile.findIndex(
+          (direction) =>
+            !!lastDirection && direction !== opposites[lastDirection],
+        )
+      : 0
 
-    return steps
+    lastDirection = directionsFromTile[directionIndex]
+    const directions = matrices[lastDirection]
+    position = position.map(
+      (coordinate, index) => coordinate + directions[index],
+    )
+
+    positions.push(position)
+    currentTile = input[position[0]][position[1]] as Tile
+
+    if (currentTile === "S") break
   }
 
-  const loopLength = countSteps(startPipe, startPos[0], startPos[1])
+  return positions
+}
 
-  return Math.ceil(loopLength / 2)
+const part1 = (rawInput: string) => {
+  const input = parseInput(rawInput)
+  const loop = getLoop(input)
+  return Math.ceil((loop.length - 1) / 2)
 }
 
 const part2 = (rawInput: string) => {
   const input = parseInput(rawInput)
+  const loop = getLoop(input)
 
-  return
+  return input
+    .map((row, y) =>
+      row
+        .map((tile, x) =>
+          booleanPointInPolygon(point([y, x]), polygon([loop]), {
+            ignoreBoundary: true,
+          }),
+        )
+        .filter((v) => v),
+    )
+    .flat().length
 }
 
 run({
   part1: {
     tests: [
-      // {
-      //         input: `.....
-      // .S-7.
-      // .|.|.
-      // .L-J.
-      // .....`,
-      //         expected: 4,
-      //       },
+      {
+        input: `.....
+.S-7.
+.|.|.
+.L-J.
+.....`,
+        expected: 4,
+      },
       {
         input: `..F7.
 .FJ|.
@@ -158,7 +182,20 @@ LJ...`,
 .|..|.|..|.
 .L--J.L--J.
 ...........`,
-        expected: "",
+        expected: 4,
+      },
+      {
+        input: `.F----7F7F7F7F-7....
+.|F--7||||||||FJ....
+.||.FJ||||||||L7....
+FJL7L7LJLJ||LJ.L-7..
+L--J.L7...LJS7F-7L7.
+....F-J..F7FJ|L7L7L7
+....L7.F7||L7|.L7L7|
+.....|FJLJ|FJ|F7|.LJ
+....FJL-7.||.||||...
+....L---J.LJ.LJLJ...`,
+        expected: 8,
       },
     ],
     solution: part2,

@@ -25,6 +25,7 @@
     "node": ">=16.13.0"
   },
   "dependencies": {
+    "@turf/turf": "^6.5.0",
     "ramda": "^0.29.1"
   }
 }
