@@ -33,8 +33,8 @@ export const getTouchingRows = (rowIndex: number, rows: string[]) =>
     rowIndex === rows.length - 1 ? rowIndex + 1 : rowIndex + 2,
   )
 
-export const between = (x: number, min: number, max: number) =>
-  x >= min && x <= max
+export const between = (x: number, num1: number, num2: number) =>
+  x >= Math.min(num1, num2) && x <= Math.max(num1, num2)
 
 export const multiply = (prev: number, val: string | number) => +val * prev
 
