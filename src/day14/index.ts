@@ -53,17 +53,13 @@ const tiltSouth = (rows: string[][]) => {
     for (let y = rows.length - 1; y >= 0; y--) {
       if (rows[y][x] === EMPTY_SPACE) {
         for (let sy = y - 1; sy >= 0; sy--) {
-          try {
-            if (rows[sy][x] === CUBE_SHAPED_ROCK) {
-              break
-            }
-            if (rows[sy][x] === ROUNDED_ROCK) {
-              rows[y][x] = ROUNDED_ROCK
-              rows[sy][x] = EMPTY_SPACE
-              break
-            }
-          } catch (e) {
-            console.log("erer", { y, sy, x })
+          if (rows[sy][x] === CUBE_SHAPED_ROCK) {
+            break
+          }
+          if (rows[sy][x] === ROUNDED_ROCK) {
+            rows[y][x] = ROUNDED_ROCK
+            rows[sy][x] = EMPTY_SPACE
+            break
           }
         }
       }
@@ -104,14 +100,7 @@ const part1 = (rawInput: string) => {
   return weigh(input)
 }
 
-const getCurrent = (input: string[][]) =>
-  input.map((r) => r.join("")).join("\n")
-
-const printCurrent = (input: string[][]) => {
-  console.log(getCurrent(input))
-  console.log(" ")
-  console.log(" ")
-}
+const toString = (input: string[][]) => input.map((r) => r.join("")).join("\n")
 
 function spinCycle(input: string[][]) {
   tiltNorth(input)
@@ -133,7 +122,7 @@ const part2 = (rawInput: string) => {
   let i2 = 0
   let i = 0
   while (i2 === 0) {
-    const current = getCurrent(input)
+    const current = toString(input)
     const firstOccurrence = results.findIndex((r) => r === current)
     const secondOccurrence = results.findIndex(
       (r, index) => r === current && index !== firstOccurrence,
@@ -151,24 +140,7 @@ const part2 = (rawInput: string) => {
     spinCycle(input)
   }
 
-  // results[n] = after n cycles
-  // results[0] = 0 cycles
-  // results[1] = 1 cycle
-  console.log({ i1, i2 })
   const resultIndex = determineResultIndex(i1, i2, 1000000000)
-
-  console.log(determineResultIndex(i1, i2, 0))
-  console.log(determineResultIndex(i1, i2, 1))
-  console.log(determineResultIndex(i1, i2, 2))
-  console.log(determineResultIndex(i1, i2, 3))
-  console.log(determineResultIndex(i1, i2, 4))
-  console.log(determineResultIndex(i1, i2, 5))
-  console.log(determineResultIndex(i1, i2, 6))
-  console.log(determineResultIndex(i1, i2, 7))
-  console.log(determineResultIndex(i1, i2, 8))
-
-  // results.map((res, i) => console.log({ i, weight: weigh(parseInput(res)) }))
-  console.log({ resultIndex })
 
   return weigh(parseInput(results[resultIndex]))
 }

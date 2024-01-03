@@ -6,7 +6,6 @@ const parseInput = (rawInput: string) => {
 }
 
 const isHorizontalMirror = (group: string[], gapIndex: number) => {
-  console.log("***", { gapIndex })
   for (let i = 0; i <= Math.min(gapIndex, group.length - gapIndex - 2); i++) {
     if (group[gapIndex - i] !== group[i + gapIndex + 1]) {
       return false
