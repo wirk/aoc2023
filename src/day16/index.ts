@@ -1,18 +1,13 @@
 import run from "aocrunner"
 import { lines } from "../utils/index.js"
-import { add } from "ramda"
+import { add, range } from "ramda"
 
-const parseInput = (rawInput: string): Tile[][] => {
-  return lines(rawInput).map((line) =>
-    line.split("").map((c) => ({
-      c,
-      isEmpty: c === ".",
-      isMirror: ["\\", "/"].includes(c),
-      isSplitter: ["|", "-"].includes(c),
-      beamSources: [],
-    })),
-  )
+const parseInput = (rawInput: string) => {
+  return lines(rawInput)
 }
+
+const expandInput = (lines: string[]): Tile[][] =>
+  lines.map((line) => line.split("").map((c) => ({ c, beamSources: [] })))
 
 type Direction = "N" | "E" | "S" | "W"
 type Position = [y: number, x: number]
@@ -23,9 +18,6 @@ type Beam = {
 }
 type Tile = {
   c: string
-  isEmpty: boolean
-  isMirror: boolean
-  isSplitter: boolean
   beamSources: Direction[]
 }
 
@@ -72,9 +64,9 @@ const debug = (input: Tile[][]) => {
   )
 }
 
-const part1 = (rawInput: string) => {
-  const input = parseInput(rawInput)
-  let beams: Beam[] = [{ direction: "E", position: [0, -1], done: false }]
+function energize(beamSource: Beam, input: string[]) {
+  const tiles = expandInput(input)
+  let beams: Beam[] = [beamSource]
 
   const move = (beam: Beam) => {
     const matrix = matrices[beam.direction]
@@ -82,7 +74,7 @@ const part1 = (rawInput: string) => {
     const newPosition: Position = beam.position.map(
       (coordinate, index) => coordinate + matrix[index],
     ) as Position
-    const tileAtNewPosition = input[newPosition[0]]?.[newPosition[1]]
+    const tileAtNewPosition = tiles[newPosition[0]]?.[newPosition[1]]
 
     if (
       tileAtNewPosition &&
@@ -115,17 +107,50 @@ const part1 = (rawInput: string) => {
     step()
   }
 
-  // debug(input)
-
-  return input
+  return tiles
     .map((row) => row.filter((tile) => !!tile.beamSources.length).length)
     .reduce(add)
 }
 
+const part1 = (rawInput: string) => {
+  const input = parseInput(rawInput)
+  const beamSource: Beam = { direction: "E", position: [0, -1], done: false }
+
+  return energize(beamSource, input)
+}
+
 const part2 = (rawInput: string) => {
   const input = parseInput(rawInput)
+  const beamSource: Beam = { direction: "S", position: [-1, 4], done: false }
 
-  return
+  const colCount = input[0].length
+  const rowCount = input.length
+  const cols = range(0, colCount)
+  const rows = range(0, rowCount)
+
+  const beamSourcesN = cols.map(
+    (x): Beam => ({ direction: "S", position: [-1, x], done: false }),
+  )
+  const beamSourcesS = cols.map(
+    (x): Beam => ({ direction: "N", position: [rowCount, x], done: false }),
+  )
+  const beamSourcesE = rows.map(
+    (y): Beam => ({ direction: "W", position: [y, colCount], done: false }),
+  )
+  const beamSourcesW = rows.map(
+    (y): Beam => ({ direction: "E", position: [y, -1], done: false }),
+  )
+
+  const beamSources = [
+    ...beamSourcesN,
+    ...beamSourcesE,
+    ...beamSourcesS,
+    ...beamSourcesW,
+  ]
+
+  return Math.max(
+    ...beamSources.map((beamSource) => energize(beamSource, input)),
+  )
 }
 
 run({
@@ -149,10 +174,19 @@ run({
   },
   part2: {
     tests: [
-      // {
-      //   input: ``,
-      //   expected: "",
-      // },
+      {
+        input: `.|...\\....
+|.-.\\.....
+.....|-...
+........|.
+..........
+.........\\
+..../.\\\\..
+.-.-/..|..
+.|....-|.\\
+..//.|....`,
+        expected: 51,
+      },
     ],
     solution: part2,
   },
